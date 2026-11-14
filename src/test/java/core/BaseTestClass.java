@@ -9,53 +9,54 @@ import utils.ResponseParser;
 
 import static io.restassured.RestAssured.given;
 
-public class BaseClass {
+public class BaseTestClass {
     protected static final String BASE_URI = ConfigReader.getValue("baseUri");
     protected final Header authorization = OAuthorization.getAuthorizationHeader();
 
-    protected Board convertResponseToJavaObj(final Response response) {
-        return ResponseParser.convertResponseToJavaObject(response, Board.class);
-    }
-
-    protected static Response getRequest(final String url, final Header header) {
+    protected static Response sendAuthenticatedGetRequest(final String url, final Header header, final int expectedStatusCode) {
         return
                 given()
                         .header(header)
+                        .when()
                         .get(url)
                         .then()
+                        .statusCode(expectedStatusCode)
                         .extract()
                         .response();
     }
 
-    protected static Response postRequest(final String url, final Header header) {
+    protected static Response sendAuthenticatedPostRequest(final String url, final Header header, final int expectedStatusCode) {
         return
                 given()
                         .header(header)
                         .when()
                         .post(url)
                         .then()
+                        .statusCode(expectedStatusCode)
                         .extract()
                         .response();
     }
 
-    protected static Response putRequest(final String url, final Header header) {
+    protected static Response sendAuthenticatedPutRequest(final String url, final Header header, final int expectedStatusCode) {
         return
                 given()
                         .header(header)
                         .when()
                         .put(url)
                         .then()
+                        .statusCode(expectedStatusCode)
                         .extract()
                         .response();
     }
 
-    protected static Response deleteRequest(final String url, final Header header) {
+    protected static Response sendAuthenticatedDeleteRequest(final String url, final Header header, final int expectedStatusCode) {
         return
                 given()
                         .header(header)
                         .when()
                         .delete(url)
                         .then()
+                        .statusCode(expectedStatusCode)
                         .extract()
                         .response();
     }

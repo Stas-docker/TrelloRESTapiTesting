@@ -1,27 +1,31 @@
 package steps;
 
-import core.BaseClass;
+import core.BaseTestClass;
 import io.restassured.response.Response;
 import org.assertj.core.api.Assertions;
 import dto.Board;
 import utils.ConfigReader;
+import utils.ResponseParser;
 
-public class BoardStepsGet extends BaseClass {
+public class BoardStepsGet extends BaseTestClass {
 
-    public Response getABoardByIDOfAddedBoard(final Response responseCreatedBoard) {
-        final String requestBoardId = convertResponseToJavaObj(responseCreatedBoard).getId();
-        final String url = BASE_URI + ConfigReader.getValue("getABoardEndPoint").replace("{id}", requestBoardId);
-        return getRequest(url, authorization);
+    private String buildBoardGettingUrl(final String boardId) {
+        return BASE_URI + ConfigReader.getValue("getABoardEndPoint").replace("{id}", boardId);
     }
 
-    public void checkPositiveStatusCode(final Response getBoardResponse) {
-        Assertions.assertThat(getBoardResponse.getStatusCode()).isEqualTo(200);
+    public Response getABoardByID(final String requestBoardId) {
+        final String url = buildBoardGettingUrl(requestBoardId);
+        return sendAuthenticatedGetRequest(url, authorization, 200);
     }
 
-    public void checkResponseBoardIdAndName(final Response responseCreatedBoard, final Response getBoardResponse) {
-        final Board createdBoard = convertResponseToJavaObj(responseCreatedBoard);
-        final Board gotBoard = convertResponseToJavaObj(getBoardResponse);
-        Assertions.assertThat(gotBoard.getId()).isEqualTo(createdBoard.getId());
-        Assertions.assertThat(gotBoard.getName()).isEqualTo(createdBoard.getName());
+    public void checkResponseBoardIdAndName(final Response responseOfGettingBoard, final String expectedName, final String expectedId) {
+        final Board gotBoard = ResponseParser.convertResponseToBoardObject(responseOfGettingBoard);
+        Assertions.assertThat(gotBoard.getId()).isEqualTo(expectedId);
+        Assertions.assertThat(gotBoard.getName()).isEqualTo(expectedName);
+    }
+
+    public Response getABoardWithANotExistingId(final String notExistingBoardId) {
+        final String url = buildBoardGettingUrl(notExistingBoardId);
+        return sendAuthenticatedGetRequest(url, authorization, 400);
     }
 }

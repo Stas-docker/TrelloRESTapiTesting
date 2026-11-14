@@ -1,26 +1,24 @@
 package steps;
 
-import core.BaseClass;
+import core.BaseTestClass;
 import io.restassured.response.Response;
 import org.assertj.core.api.Assertions;
 import utils.ConfigReader;
 
 
-public class BoardStepsDelete extends BaseClass {
-    private final BoardStepsGet boardStepsGet = new BoardStepsGet();
+public class BoardStepsDelete extends BaseTestClass {
 
-    public Response deleteAddedBoardById(final Response responseOfCreatedBoard) {
-        final String requestBoardId = convertResponseToJavaObj(responseOfCreatedBoard).getId();
-        final String url = BASE_URI + ConfigReader.getValue("deleteABoardEndPoint").replace("{id}", requestBoardId);
-        return deleteRequest(url, authorization);
+    private String buildBoardGettingUrl(final String boardId) {
+        return BASE_URI + ConfigReader.getValue("deleteABoardEndPoint").replace("{id}", boardId);
     }
 
-    public void checkStatusCode(final Response responseOfDeletedBoard) {
-        Assertions.assertThat(responseOfDeletedBoard.getStatusCode()).isEqualTo(200);
+    public Response deleteBoardById(final String boardId) {
+        final String url = buildBoardGettingUrl(boardId);
+        return sendAuthenticatedDeleteRequest(url, authorization, 200);
     }
 
-    public void checkBoardNotFoundAfterDeletion(final Response responseOfCreatedBoard) {
-        final Response getBoardAfterDeletion = boardStepsGet.getABoardByIDOfAddedBoard(responseOfCreatedBoard);
-        Assertions.assertThat(getBoardAfterDeletion.getStatusCode()).isEqualTo(404);
+    public Response checkBoardNotFoundAfterDeletion(final String boardId) {
+        final String getABoardUrl = buildBoardGettingUrl(boardId);
+        return sendAuthenticatedGetRequest(getABoardUrl, authorization, 404);
     }
 }
